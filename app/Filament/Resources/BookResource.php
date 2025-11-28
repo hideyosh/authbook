@@ -234,7 +234,7 @@ class BookResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('created_at', 'desc');            
     }
 
     public static function getRelations(): array
