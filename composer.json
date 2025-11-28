@@ -8,7 +8,10 @@
     "require": {
         "php": "^8.2",
         "filament/filament": "3.3",
+<<<<<<< HEAD
         "intervention/image": "^3.11",
+=======
+>>>>>>> 4c513d395d8ed5aafb49272960f177996fe226b0
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1"
     },

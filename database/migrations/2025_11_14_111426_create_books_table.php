@@ -18,9 +18,13 @@ return new class extends Migration
             $table->foreignId('author_id')->constrained()->onDelete('cascade');
             $table->string('publisher')->nullable();
             $table->year('year')->nullable();
+<<<<<<< HEAD
             $table->string('cover');
             $table->json('gallery')->nullable();
             // $table->string('pdf_file')->nullable();
+=======
+            $table->string('cover')->nullable();
+>>>>>>> 4c513d395d8ed5aafb49272960f177996fe226b0
             $table->enum('status', ['available', 'borrowed'])->default('available');
             $table->text('desc')->nullable();
             $table->timestamps();
