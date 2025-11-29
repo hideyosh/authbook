@@ -89,7 +89,24 @@ class BookResource extends Resource
                             ->maxSize(2048)
                             ->required()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->helperText('Maximum file size: 2MB. Accepted formats: JPEG, PNG, WebP'),
+                            ->helperText('Maximum file size: 2MB. Accepted formats: JPEG, PNG, WebP')
+                            ->afterStateUpdated(function ($state) {
+                                if (! $state) {
+                                    return;
+                                }
+                                $tempPath = $state->getRealPath();
+                                if (! $tempPath || ! file_exists($tempPath)) {
+                                    return;
+                                }
+                                $fileName = basename($state->getClientOriginalName());
+                                $thumbnailPath = storage_path('app/public/book-covers/thumbnails/'.$fileName);
+                                $manager = new \Intervention\Image\ImageManager(
+                                    new \Intervention\Image\Drivers\Gd\Driver
+                                );
+                                $img = $manager->read($tempPath);
+                                $img->cover(200, 300);
+                                $img->save($thumbnailPath);
+                            }),
 
                         Forms\Components\FileUpload::make('pdf_file')
                             ->label('PDF File (Optional)')
@@ -106,8 +123,10 @@ class BookResource extends Resource
                             ->disk('public')
                             ->directory('book-gallery')
                             ->visibility('public')
+                            ->imageEditor()
                             ->image()
                             ->multiple()
+                            ->minFiles(3)
                             ->maxFiles(5)
                             ->reorderable()
                             ->columnSpanFull(),
@@ -120,18 +139,9 @@ class BookResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('thumbnail')
-                    ->label('Cover')
+                Tables\Columns\ImageColumn::make('cover')
                     ->circular()
-                    ->getStateUsing(function ($record) {
-                        if ($record->thumbnail) {
-                            return $record->thumbnail;
-                        }
-                        if ($record->cover) {
-                            return $record->cover;
-                        }
-                        return "https://placehold.co/200x300?text=Book+ID+" . $record->id . "&font=roboto";
-                    }),
+                    ->defaultImageUrl(fn ($record) => asset('storage/book-covers/thumbnails/'.basename($record->cover))),
 
                 Tables\Columns\TextColumn::make('isbn')
                     ->label('ISBN')
@@ -234,7 +244,7 @@ class BookResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc');            
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array

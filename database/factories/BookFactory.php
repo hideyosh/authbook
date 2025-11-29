@@ -24,12 +24,9 @@ class BookFactory extends Factory
             'author_id' => Author::factory(),
             'publisher' => fake()->company(),
             'year' => fake()->numberBetween(1950, 2024),
-<<<<<<< HEAD
             'cover' => 'book-covers/default-book-cover.jpg',
             // 'cover' => 'https://via.placeholder.com/300x400.png?text=Book+Cover',
             'pdf_file' => fake()->boolean(30) ? 'book-pdfs/sample.pdf' : null,
-=======
->>>>>>> 4c513d395d8ed5aafb49272960f177996fe226b0
             'status' => fake()->randomElement(['available', 'borrowed']),
             'desc' => fake()->paragraph(3, true),
         ];

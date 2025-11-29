@@ -15,10 +15,18 @@ class ViewBook extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-               Actions\Action::make('download')
+            Actions\Action::make('download')
                 ->label('Download PDF')
                 ->icon('heroicon-o-arrow-down-tray')
-                ->color('success'),
+                ->color('success')
+                ->action(function ($record) {
+                    $record->increment('counter');
+
+                    return response()->download(
+                        storage_path('app/public/'.$record->pdf_file)
+                    );
+                })
+                ->visible(fn ($record) => $record->pdf_file !== null),
             Actions\EditAction::make(),
             Actions\DeleteAction::make(),
         ];
@@ -29,19 +37,9 @@ class ViewBook extends ViewRecord
         return $infolist->schema([
             Infolists\Components\Section::make('Book Cover')
                 ->schema([
-                    Infolists\Components\ImageEntry::make('thumbnail')
-                    ->label('Cover')
-                    ->height(240)
-                    ->defaultImageUrl(url('https://placehold.co/200x300?text=Book+ID+' . 'id' . '&font=roboto'))
-                    ->getStateUsing(function ($record) {
-                        if ($record->thumbnail) {
-                            return asset('storage/' . $record->thumbnail);
-                        }
-                        if ($record->cover) {
-                            return asset('storage/' . $record->cover);
-                        }
-                        return null;
-                    }),
+                    Infolists\Components\ImageEntry::make('cover')
+                            ->height(200)
+                            ->defaultImageUrl(url('/images/default-book-cover.png')),
                 ]),
 
 
@@ -52,7 +50,7 @@ class ViewBook extends ViewRecord
                         ->copyable(),
 
                     Infolists\Components\TextEntry::make('title')
-                       ->extraAttributes(['class' => 'text-lg tracking-wide'])
+                        ->extraAttributes(['class' => 'text-lg tracking-wide'])
                             ->weight('semibold')
                             ->color('primary'),
 
@@ -80,6 +78,12 @@ class ViewBook extends ViewRecord
                         )
                         ->openUrlInNewTab(),
 
+                    Infolists\Components\TextEntry::make('counter')
+                            ->label('Jumlah PDF Terdownload')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->badge()
+                            ->color('info'),
+
                     Infolists\Components\TextEntry::make('status')
                         ->badge()
                         ->color(fn ($state) => match ($state) {
@@ -96,8 +100,9 @@ class ViewBook extends ViewRecord
                         Infolists\Components\ImageEntry::make('gallery')
                             ->disk('public')
                             ->height(150)
-                            ->stacked()
-                            ->columnSpanFull(),
+                            ->stacked(false)
+                            ->columnSpanFull()
+                            ->limit(5),
                     ])
         ]);
     }

@@ -21,7 +21,8 @@ class Book extends Model
         'pdf_file',
         'status',
         'desc',
-        'gallery'
+        'gallery',
+        'counter'
     ];
 
     protected $casts = [
